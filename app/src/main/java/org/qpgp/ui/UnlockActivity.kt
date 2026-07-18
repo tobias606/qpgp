@@ -17,15 +17,15 @@ class UnlockActivity : SecureActivity() {
 
         val col = Ui.column(this)
         col.addView(Ui.title(this, "⬢ qPGP"))
-        col.addView(Ui.mono(this, "offline · no network permission · post-quantum", Ui.MUTED))
-        col.addView(Ui.spacer(this, 40))
+        col.addView(Ui.subtitle(this, "offline · zero permissions · post-quantum"))
 
         if (fresh) {
-            col.addView(Ui.label(this, "No vault on this device. Choose a strong passphrase (it cannot be recovered — there is no reset)."))
+            col.addView(Ui.label(this,
+                "No vault on this device yet.\nChoose a strong passphrase — it cannot be recovered, there is no reset."))
             val p1 = Ui.password(this, "passphrase")
             val p2 = Ui.password(this, "repeat passphrase")
-            col.addView(p1); col.addView(Ui.spacer(this, 16)); col.addView(p2)
-            col.addView(Ui.spacer(this, 24))
+            col.addView(p1); col.addView(Ui.spacer(this, 20)); col.addView(p2)
+            col.addView(Ui.spacer(this, 36))
             col.addView(Ui.button(this, "Create vault") {
                 val a = p1.text.toString(); val b = p2.text.toString()
                 when {
@@ -46,7 +46,7 @@ class UnlockActivity : SecureActivity() {
             col.addView(Ui.label(this, "Vault is locked."))
             val p = Ui.password(this, "passphrase")
             col.addView(p)
-            col.addView(Ui.spacer(this, 24))
+            col.addView(Ui.spacer(this, 36))
             col.addView(Ui.button(this, "Unlock") {
                 val pass = p.text.toString().toCharArray()
                 p.text.clear()

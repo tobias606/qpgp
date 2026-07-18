@@ -181,4 +181,29 @@ class ProtocolTest {
         val enc = Armor.encode(Armor.TYPE_MESSAGE, data)
         assertTrue(Hybrid.constantTimeEquals(data, Armor.decode(Armor.TYPE_MESSAGE, enc)))
     }
+
+    @Test
+    fun truncatedPasteGivesClearDiagnosis() {
+        // simulates emulator/clipboard cutting a long identity block short
+        val alice = freshUser("alice")
+        val block = Engine.exportIdentity(alice, "alice")
+        val truncated = block.substring(0, block.length / 2)
+        try {
+            Engine.importContact(truncated)
+            throw AssertionError("must reject truncated paste")
+        } catch (e: Exception) {
+            assertTrue("error should mention truncation, got: ${e.message}",
+                e.message!!.contains("TRUNCATED"))
+        }
+    }
+
+    @Test
+    fun invisibleCharsAreTolerated() {
+        // zero-width chars injected by some clipboards must not break parsing
+        val alice = freshUser("alice")
+        val block = Engine.exportIdentity(alice, "alice")
+        val polluted = "\uFEFF" + block.replace("BEGIN", "BE\u200BGIN")
+        val c = Engine.importContact(polluted)
+        assertEquals("alice", c.name)
+    }
 }

@@ -12,10 +12,11 @@ class AddContactActivity : SecureActivity() {
 
         val col = Ui.column(this)
         col.addView(Ui.title(this, "⬢ Add contact"))
-        col.addView(Ui.label(this, "Paste the QPGP IDENTITY block you received:"))
+        col.addView(Ui.subtitle(this, "paste their identity block"))
+
         val input = Ui.field(this, "-----BEGIN QPGP IDENTITY----- …", multi = true)
         col.addView(input)
-        col.addView(Ui.spacer(this, 24))
+        col.addView(Ui.spacer(this, 28))
         col.addView(Ui.button(this, "Import") {
             try {
                 val c = Engine.importContact(input.text.toString())
@@ -35,21 +36,22 @@ class AddContactActivity : SecureActivity() {
                 val words = Engine.verificationWords(mine, c.sigPub)
                 col.removeAllViews()
                 col.addView(Ui.title(this, "⚠ Verify ${c.name}"))
+                col.addView(Ui.subtitle(this, "man-in-the-middle check"))
                 col.addView(Ui.label(this,
                     "Both of you must see the SAME six words. Compare in person or " +
                     "over a call where you recognize the voice. If they differ, someone " +
                     "is intercepting — delete this contact."))
-                col.addView(Ui.spacer(this, 16))
-                col.addView(Ui.mono(this, words, Ui.WARN).apply { textSize = 18f })
-                col.addView(Ui.spacer(this, 32))
-                col.addView(Ui.button(this, "Words MATCH — mark verified", Ui.ACCENT) {
+                col.addView(Ui.spacer(this, 20))
+                col.addView(Ui.monoCard(this, words, Ui.WARN).apply { textSize = 17f })
+                col.addView(Ui.spacer(this, 40))
+                col.addView(Ui.button(this, "Words MATCH — mark verified", Ui.ACCENT_DIM) {
                     c.verified = true
                     Session.persist(this)
                     finish()
                 })
-                col.addView(Ui.spacer(this, 12))
-                col.addView(Ui.button(this, "Can't verify yet (stays UNVERIFIED)", Ui.FIELD_BG) { finish() })
-                col.addView(Ui.spacer(this, 12))
+                col.addView(Ui.spacer(this, 16))
+                col.addView(Ui.buttonAlt(this, "Can't verify yet (stays unverified)") { finish() })
+                col.addView(Ui.spacer(this, 16))
                 col.addView(Ui.button(this, "Words DIFFER — delete contact", Ui.DANGER) {
                     d.contacts.remove(c)
                     Session.persist(this)

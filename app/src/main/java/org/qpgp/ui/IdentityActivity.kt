@@ -13,26 +13,29 @@ class IdentityActivity : SecureActivity() {
 
         val col = Ui.column(this)
         col.addView(Ui.title(this, "⬢ My identity"))
-        col.addView(Ui.label(this, "Fingerprint (verify with your contact in person):"))
-        col.addView(Ui.mono(this, Engine.shortFingerprint(id.sig.pub), Ui.ACCENT))
-        col.addView(Ui.spacer(this, 24))
+        col.addView(Ui.subtitle(this, "public keys only — safe to share"))
+
+        col.addView(Ui.label(this, "Fingerprint — verify with your contact in person:"))
+        col.addView(Ui.monoCard(this, Engine.shortFingerprint(id.sig.pub), Ui.ACCENT))
+        col.addView(Ui.spacer(this, 28))
+
         col.addView(Ui.label(this,
-            "Share the block below with a contact so they can add you. " +
-            "It contains ONLY public keys. qPGP never uses the clipboard — " +
-            "the block is shown via the system share sheet, choose your channel deliberately."))
+            "Share the block below so a contact can add you. It contains only " +
+            "public keys. qPGP never touches the clipboard itself — long-press " +
+            "the block to select and copy it deliberately."))
 
         val name = Ui.field(this, "display name to embed (optional)")
         col.addView(name)
-        col.addView(Ui.spacer(this, 16))
+        col.addView(Ui.spacer(this, 24))
 
-        val out = Ui.mono(this, "", Ui.FG)
+        val out = Ui.monoCard(this)
         col.addView(Ui.button(this, "Generate identity block") {
             val block = Engine.exportIdentity(d, name.text.toString().take(48))
             out.text = block
             out.setTextIsSelectable(true)
-            Toast.makeText(this, "Long-press to select & share. Public keys only.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Long-press the block to select & copy.", Toast.LENGTH_LONG).show()
         })
-        col.addView(Ui.spacer(this, 16))
+        col.addView(Ui.spacer(this, 24))
         col.addView(out)
 
         setContentView(ScrollView(this).apply { setBackgroundColor(Ui.BG); addView(col) })
