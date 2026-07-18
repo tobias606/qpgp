@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- hexagonal vault mark -->
+    <path android:fillColor="#2EA043"
+        android:pathData="M54,26 L76,39 L76,65 L54,78 L32,65 L32,39 Z"/>
+    <path android:fillColor="#0D1117"
+        android:pathData="M54,38 L66,45 L66,59 L54,66 L42,59 L42,45 Z"/>
+    <path android:fillColor="#2EA043"
+        android:pathData="M50,48 h8 v12 h-8 z"/>
+</vector>
