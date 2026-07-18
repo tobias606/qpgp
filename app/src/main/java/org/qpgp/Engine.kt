@@ -1,12 +1,12 @@
-package org.kelopatra
+package org.qpgp
 
-import org.kelopatra.crypto.Hybrid
-import org.kelopatra.protocol.Armor
-import org.kelopatra.protocol.Protocol
-import org.kelopatra.protocol.Wire
-import org.kelopatra.store.Contact
-import org.kelopatra.store.Identity
-import org.kelopatra.store.VaultData
+import org.qpgp.crypto.Hybrid
+import org.qpgp.protocol.Armor
+import org.qpgp.protocol.Protocol
+import org.qpgp.protocol.Wire
+import org.qpgp.store.Contact
+import org.qpgp.store.Identity
+import org.qpgp.store.VaultData
 
 /**
  * Session engine: pure logic tying identity, contacts and the protocol
@@ -54,7 +54,7 @@ object Engine {
         val a = Hybrid.fingerprint(mine)
         val b = Hybrid.fingerprint(theirs)
         val combined = if (compareBytes(a, b) <= 0) a + b else b + a
-        val h = Hybrid.hkdf(combined, ByteArray(0), "KELOPATRA-v1/sas".toByteArray(), 6)
+        val h = Hybrid.hkdf(combined, ByteArray(0), "QPGP-v1/sas".toByteArray(), 6)
         return h.joinToString(" ") { WORDS[it.toInt() and 0xff] }
     }
 

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "org.kelopatra"
+    namespace = "org.qpgp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "org.kelopatra"
+        applicationId = "org.qpgp"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

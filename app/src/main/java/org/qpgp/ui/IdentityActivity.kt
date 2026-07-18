@@ -1,9 +1,9 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.os.Bundle
 import android.widget.ScrollView
 import android.widget.Toast
-import org.kelopatra.Engine
+import org.qpgp.Engine
 
 class IdentityActivity : SecureActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,7 +18,7 @@ class IdentityActivity : SecureActivity() {
         col.addView(Ui.spacer(this, 24))
         col.addView(Ui.label(this,
             "Share the block below with a contact so they can add you. " +
-            "It contains ONLY public keys. Kelopatra never uses the clipboard — " +
+            "It contains ONLY public keys. qPGP never uses the clipboard — " +
             "the block is shown via the system share sheet, choose your channel deliberately."))
 
         val name = Ui.field(this, "display name to embed (optional)")

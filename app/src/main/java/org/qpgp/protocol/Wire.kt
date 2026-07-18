@@ -1,4 +1,4 @@
-package org.kelopatra.protocol
+package org.qpgp.protocol
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream

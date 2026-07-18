@@ -1,10 +1,10 @@
-package org.kelopatra.store
+package org.qpgp.store
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import org.kelopatra.crypto.Hybrid
-import org.kelopatra.protocol.Wire
+import org.qpgp.crypto.Hybrid
+import org.qpgp.protocol.Wire
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -27,7 +27,7 @@ import javax.crypto.spec.GCMParameterSpec
  */
 class Vault(private val ctx: Context) {
 
-    private val file: File get() = File(ctx.filesDir, "vault.klp")
+    private val file: File get() = File(ctx.filesDir, "vault.qpgp")
 
     fun exists(): Boolean = file.exists()
 
@@ -45,7 +45,7 @@ class Vault(private val ctx: Context) {
 
         val out = Wire.Writer().byte(1).raw(salt).raw(iv)
             .bytes(outer.also { require(it.size < 32 * 1024 * 1024) })
-        val tmp = File(ctx.filesDir, "vault.klp.tmp")
+        val tmp = File(ctx.filesDir, "vault.qpgp.tmp")
         tmp.writeBytes(out.done())
         if (!tmp.renameTo(file)) { file.delete(); tmp.renameTo(file) } // atomic-ish swap
     }
@@ -110,7 +110,7 @@ class Vault(private val ctx: Context) {
 
     companion object {
         private const val ANDROID_KS = "AndroidKeyStore"
-        private const val KEY_ALIAS = "kelopatra.vault.v1"
-        private val AD = "KELOPATRA-v1/vault".toByteArray()
+        private const val KEY_ALIAS = "qpgp.vault.v1"
+        private val AD = "QPGP-v1/vault".toByteArray()
     }
 }

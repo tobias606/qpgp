@@ -1,14 +1,14 @@
-package org.kelopatra
+package org.qpgp
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.kelopatra.crypto.Hybrid
-import org.kelopatra.protocol.Armor
-import org.kelopatra.protocol.Protocol
-import org.kelopatra.store.VaultCodec
-import org.kelopatra.store.VaultData
+import org.qpgp.crypto.Hybrid
+import org.qpgp.protocol.Armor
+import org.qpgp.protocol.Protocol
+import org.qpgp.store.VaultCodec
+import org.qpgp.store.VaultData
 
 /**
  * End-to-end tests of the crypto core, rotation protocol and codecs.

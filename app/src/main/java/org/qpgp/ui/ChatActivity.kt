@@ -1,9 +1,9 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.os.Bundle
 import android.widget.ScrollView
 import android.widget.Toast
-import org.kelopatra.Engine
+import org.qpgp.Engine
 
 class ChatActivity : SecureActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,8 +49,8 @@ class ChatActivity : SecureActivity() {
         col.addView(Ui.spacer(this, 40))
 
         // ---- DECRYPT ----
-        col.addView(Ui.label(this, "DECRYPT — paste a KELOPATRA MESSAGE block:", Ui.ACCENT))
-        val cipherIn = Ui.field(this, "-----BEGIN KELOPATRA MESSAGE----- …", multi = true)
+        col.addView(Ui.label(this, "DECRYPT — paste a QPGP MESSAGE block:", Ui.ACCENT))
+        val cipherIn = Ui.field(this, "-----BEGIN QPGP MESSAGE----- …", multi = true)
         col.addView(cipherIn)
         col.addView(Ui.spacer(this, 12))
         val plainOut = Ui.mono(this, "")
@@ -76,7 +76,7 @@ class ChatActivity : SecureActivity() {
         col.addView(plainOut)
         col.addView(Ui.spacer(this, 24))
         col.addView(Ui.mono(this,
-            "keys: theirs=${c.theirKeys.size} kept · ours=${c.ourKeys.size} kept · window=${org.kelopatra.protocol.Protocol.KEY_WINDOW}",
+            "keys: theirs=${c.theirKeys.size} kept · ours=${c.ourKeys.size} kept · window=${org.qpgp.protocol.Protocol.KEY_WINDOW}",
             Ui.MUTED))
 
         setContentView(ScrollView(this).apply { setBackgroundColor(Ui.BG); addView(col) })

@@ -1,12 +1,12 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
-import org.kelopatra.store.Vault
-import org.kelopatra.store.VaultData
+import org.qpgp.store.Vault
+import org.qpgp.store.VaultData
 
 /**
  * In-memory session. The decrypted vault lives ONLY here, only while unlocked.

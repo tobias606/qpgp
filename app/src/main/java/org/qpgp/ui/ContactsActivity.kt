@@ -1,9 +1,9 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ScrollView
-import org.kelopatra.Engine
+import org.qpgp.Engine
 
 class ContactsActivity : SecureActivity() {
     override fun onResume() {

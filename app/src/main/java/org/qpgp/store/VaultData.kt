@@ -1,8 +1,8 @@
-package org.kelopatra.store
+package org.qpgp.store
 
-import org.kelopatra.crypto.Hybrid
-import org.kelopatra.protocol.Protocol
-import org.kelopatra.protocol.Wire
+import org.qpgp.crypto.Hybrid
+import org.qpgp.protocol.Protocol
+import org.qpgp.protocol.Wire
 
 /**
  * In-memory model of everything the vault holds. Serialized with the same

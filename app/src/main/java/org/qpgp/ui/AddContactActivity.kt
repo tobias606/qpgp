@@ -1,9 +1,9 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.os.Bundle
 import android.widget.ScrollView
 import android.widget.Toast
-import org.kelopatra.Engine
+import org.qpgp.Engine
 
 class AddContactActivity : SecureActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -12,8 +12,8 @@ class AddContactActivity : SecureActivity() {
 
         val col = Ui.column(this)
         col.addView(Ui.title(this, "⬢ Add contact"))
-        col.addView(Ui.label(this, "Paste the KELOPATRA IDENTITY block you received:"))
-        val input = Ui.field(this, "-----BEGIN KELOPATRA IDENTITY----- …", multi = true)
+        col.addView(Ui.label(this, "Paste the QPGP IDENTITY block you received:"))
+        val input = Ui.field(this, "-----BEGIN QPGP IDENTITY----- …", multi = true)
         col.addView(input)
         col.addView(Ui.spacer(this, 24))
         col.addView(Ui.button(this, "Import") {
@@ -21,11 +21,11 @@ class AddContactActivity : SecureActivity() {
                 val c = Engine.importContact(input.text.toString())
                 val mine = d.identity!!.sig.pub
                 val dup = d.contacts.any {
-                    org.kelopatra.crypto.Hybrid.constantTimeEquals(it.fingerprint(), c.fingerprint())
+                    org.qpgp.crypto.Hybrid.constantTimeEquals(it.fingerprint(), c.fingerprint())
                 }
                 if (dup) { Toast.makeText(this, "Contact already exists", Toast.LENGTH_SHORT).show(); return@button }
-                if (org.kelopatra.crypto.Hybrid.constantTimeEquals(
-                        org.kelopatra.crypto.Hybrid.fingerprint(mine), c.fingerprint())) {
+                if (org.qpgp.crypto.Hybrid.constantTimeEquals(
+                        org.qpgp.crypto.Hybrid.fingerprint(mine), c.fingerprint())) {
                     Toast.makeText(this, "That is your own identity", Toast.LENGTH_SHORT).show(); return@button
                 }
                 d.contacts.add(c)

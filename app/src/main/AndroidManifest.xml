@@ -7,9 +7,9 @@
          Any future diff adding a <uses-permission> line is a red flag. -->
 
     <application
-        android:label="Kelopatra"
+        android:label="qPGP"
         android:icon="@mipmap/ic_launcher"
-        android:theme="@style/Theme.Kelopatra"
+        android:theme="@style/Theme.qPGP"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

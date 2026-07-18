@@ -1,8 +1,8 @@
-# ⬢ Kelopatra
+# ⬢ qPGP
 
 **An offline, post-quantum, zero-permission vault for encrypting and decrypting sensitive messages on Android.**
 
-Kelopatra is not a messenger. It has no network code and — more importantly — **no `INTERNET` permission**, so the Linux kernel itself refuses to give it a socket. It is a sealed room: you write a message, it comes out as armored ciphertext, and *you* choose how that ciphertext travels (paste it into any channel, print it, carry it on paper). Decryption happens the same way, in reverse.
+qPGP is not a messenger. It has no network code and — more importantly — **no `INTERNET` permission**, so the Linux kernel itself refuses to give it a socket. It is a sealed room: you write a message, it comes out as armored ciphertext, and *you* choose how that ciphertext travels (paste it into any channel, print it, carry it on paper). Decryption happens the same way, in reverse.
 
 ---
 
@@ -10,7 +10,7 @@ Kelopatra is not a messenger. It has no network code and — more importantly �
 
 ### Cryptography — hybrid everything, no compromises
 
-Breaking any Kelopatra message requires breaking **both** a NIST post-quantum primitive **and** a mature classical primitive:
+Breaking any qPGP message requires breaking **both** a NIST post-quantum primitive **and** a mature classical primitive:
 
 | Purpose | Post-quantum | Classical | Combiner |
 |---|---|---|---|
@@ -39,7 +39,7 @@ Additional protocol properties:
 
 - **Identity pinning** — the sender fingerprint inside the payload must match the contact you have on file; valid-but-wrong-sender messages are rejected.
 - **Replay detection** — per-contact counter window (last 64); replays decrypt but are loudly flagged.
-- **Domain separation** — every derived key uses an explicit `KELOPATRA-v1/...` info string.
+- **Domain separation** — every derived key uses an explicit `QPGP-v1/...` info string.
 - **Rigid parsing** — length-prefixed binary format, hard caps on every field, trailing-garbage rejection, no text interpretation of untrusted input.
 
 ### Vault at rest — two independent layers
@@ -65,13 +65,13 @@ An attacker needs **both** the physical, un-reset device **and** your passphrase
 
 ### Verification ceremony
 
-Adding a contact only pastes public keys — that alone **cannot** rule out a man-in-the-middle who swapped the identity block in transit. So Kelopatra immediately shows **six verification words** derived from both parties' fingerprints (order-independent — both of you see the same words). Compare them in person or over a voice channel you trust. Contacts stay loudly `UNVERIFIED` until you do.
+Adding a contact only pastes public keys — that alone **cannot** rule out a man-in-the-middle who swapped the identity block in transit. So qPGP immediately shows **six verification words** derived from both parties' fingerprints (order-independent — both of you see the same words). Compare them in person or over a voice channel you trust. Contacts stay loudly `UNVERIFIED` until you do.
 
 ---
 
 ## Honest residual risks (read this)
 
-1. **A compromised OS/kernel defeats everything.** Kelopatra contains blast radius; it cannot make a rooted-by-malware phone safe.
+1. **A compromised OS/kernel defeats everything.** qPGP contains blast radius; it cannot make a rooted-by-malware phone safe.
 2. **The IME (keyboard) sees your plaintext as you type it.** Use a trusted keyboard; ideally a device without third-party IMEs.
 3. **Whoever can read your screen reads your messages.** The analog hole is not solvable in software.
 4. **Traffic analysis**: ciphertext you paste into another app reveals *that* you communicate, when, and roughly how much (sizes are not yet padded — planned).

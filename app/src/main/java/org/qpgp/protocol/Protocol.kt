@@ -1,9 +1,9 @@
-package org.kelopatra.protocol
+package org.qpgp.protocol
 
-import org.kelopatra.crypto.Hybrid
+import org.qpgp.crypto.Hybrid
 
 /**
- * Kelopatra message protocol v1 — offline pairwise messaging with
+ * qPGP message protocol v1 — offline pairwise messaging with
  * continuous KEM key rotation ("ratchet by correspondence").
  *
  * ROTATION DESIGN (hardened version of the user's scheme):

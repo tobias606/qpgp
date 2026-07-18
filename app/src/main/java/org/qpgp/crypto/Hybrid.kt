@@ -1,4 +1,4 @@
-package org.kelopatra.crypto
+package org.qpgp.crypto
 
 import org.bouncycastle.crypto.agreement.X25519Agreement
 import org.bouncycastle.crypto.digests.SHA512Digest
@@ -31,7 +31,7 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 
 /**
- * Kelopatra hybrid cryptography core.
+ * qPGP hybrid cryptography core.
  *
  * PRINCIPLES
  *  - Hybrid everything: breaking the composite requires breaking BOTH the
@@ -47,7 +47,7 @@ object Hybrid {
 
     val rng = SecureRandom()
 
-    const val PROTO = "KELOPATRA-v1"
+    const val PROTO = "QPGP-v1"
 
     // ---------- containers ----------
 

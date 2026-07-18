@@ -1,4 +1,4 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.content.Intent
 import android.graphics.Color

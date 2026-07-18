@@ -1,6 +1,6 @@
-package org.kelopatra.protocol
+package org.qpgp.protocol
 
-import org.kelopatra.crypto.Hybrid
+import org.qpgp.crypto.Hybrid
 import java.util.Base64
 
 /**
@@ -17,16 +17,16 @@ object Armor {
         val b64 = Base64.getEncoder().encodeToString(data)
         val body = b64.chunked(64).joinToString("\n")
         val check = Base64.getEncoder().encodeToString(Hybrid.sha512(data).copyOf(6))
-        return "-----BEGIN KELOPATRA $type-----\n$body\n=$check\n-----END KELOPATRA $type-----"
+        return "-----BEGIN QPGP $type-----\n$body\n=$check\n-----END QPGP $type-----"
     }
 
     fun decode(type: String, text: String): ByteArray {
-        val begin = "-----BEGIN KELOPATRA $type-----"
-        val end = "-----END KELOPATRA $type-----"
+        val begin = "-----BEGIN QPGP $type-----"
+        val end = "-----END QPGP $type-----"
         val t = text.trim()
         val s = t.indexOf(begin)
         val e = t.indexOf(end)
-        if (s < 0 || e < 0 || e <= s) throw Wire.MalformedException("not a KELOPATRA $type block")
+        if (s < 0 || e < 0 || e <= s) throw Wire.MalformedException("not a QPGP $type block")
         val lines = t.substring(s + begin.length, e).trim().lines().map { it.trim() }.filter { it.isNotEmpty() }
         if (lines.isEmpty()) throw Wire.MalformedException("empty armor")
         val checkLine = lines.lastOrNull { it.startsWith("=") } ?: throw Wire.MalformedException("missing checksum")

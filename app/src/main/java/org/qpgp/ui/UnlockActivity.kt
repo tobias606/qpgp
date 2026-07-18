@@ -1,11 +1,11 @@
-package org.kelopatra.ui
+package org.qpgp.ui
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ScrollView
 import android.widget.Toast
-import org.kelopatra.Engine
-import org.kelopatra.store.Vault
+import org.qpgp.Engine
+import org.qpgp.store.Vault
 
 class UnlockActivity : SecureActivity() {
     override fun needsUnlock() = false
@@ -16,7 +16,7 @@ class UnlockActivity : SecureActivity() {
         val fresh = !vault.exists()
 
         val col = Ui.column(this)
-        col.addView(Ui.title(this, "⬢ KELOPATRA"))
+        col.addView(Ui.title(this, "⬢ qPGP"))
         col.addView(Ui.mono(this, "offline · no network permission · post-quantum", Ui.MUTED))
         col.addView(Ui.spacer(this, 40))
 
