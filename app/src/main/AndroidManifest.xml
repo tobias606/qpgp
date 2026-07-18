@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- SECURITY INVARIANT: this manifest declares ZERO permissions.
-         In particular android.permission.INTERNET is deliberately absent:
-         the Linux kernel will refuse socket creation for this app.
-         Any future diff adding a <uses-permission> line is a red flag. -->
+    <!-- SECURITY INVARIANTS:
+         - android.permission.INTERNET is deliberately absent: the kernel
+           refuses socket creation for this app. Any diff adding it is a red flag.
+         - CAMERA is the ONLY permission, added solely for QR identity
+           scanning. It is runtime-requested only while the scan screen is
+           open, and QR content feeds the same strict parser as pasted text. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:label="qPGP"
@@ -31,5 +35,7 @@
         <activity android:name=".ui.ChatActivity" android:exported="false" />
         <activity android:name=".ui.IdentityActivity" android:exported="false" />
         <activity android:name=".ui.AddContactActivity" android:exported="false" />
+        <activity android:name=".ui.QrShowActivity" android:exported="false" />
+        <activity android:name=".ui.QrScanActivity" android:exported="false" />
     </application>
 </manifest>

@@ -91,6 +91,26 @@ object Ui {
     fun buttonAlt(a: AppCompatActivity, s: String, textColor: Int = FG, onClick: () -> Unit) =
         button(a, s, CARD, onClick).apply { setTextColor(textColor) }
 
+    /** Green "copy" pill sitting above an output card. Writes [text()] to the clipboard.
+     *  POLICY: only for PUBLIC outputs (ciphertext, identity blocks) — never
+     *  for decrypted plaintext or anything secret. */
+    fun copyButton(a: AppCompatActivity, what: String, source: () -> String) = Button(a).apply {
+        text = "⧉  Copy $what"
+        setTextColor(ACCENT)
+        background = rounded(CARD, ACCENT_DIM, 40f)
+        isAllCaps = false; textSize = 13f
+        stateListAnimator = null; elevation = 0f
+        setPadding(30, 18, 30, 18)
+        setOnClickListener {
+            val t = source()
+            if (t.isBlank()) return@setOnClickListener
+            val cm = a.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                as android.content.ClipboardManager
+            cm.setPrimaryClip(android.content.ClipData.newPlainText("qPGP $what", t))
+            android.widget.Toast.makeText(a, "$what copied", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun column(a: AppCompatActivity) = LinearLayout(a).apply {
         orientation = LinearLayout.VERTICAL
         setBackgroundColor(BG)

@@ -30,6 +30,8 @@ class ChatActivity : SecureActivity() {
         col.addView(plain)
         col.addView(Ui.spacer(this, 18))
         val cipherOut = Ui.monoCard(this)
+        val copyCipher = Ui.copyButton(this, "ciphertext") { cipherOut.text.toString() }
+        copyCipher.visibility = android.view.View.GONE
         col.addView(Ui.button(this, "Encrypt  ➜  ciphertext") {
             try {
                 val msg = plain.text.toString()
@@ -39,14 +41,17 @@ class ChatActivity : SecureActivity() {
                 plain.text.clear()                    // plaintext leaves the screen
                 cipherOut.text = armored
                 cipherOut.setTextIsSelectable(true)
+                copyCipher.visibility = android.view.View.VISIBLE
                 Toast.makeText(this,
-                    "Encrypted — key rotated (msg #${c.sendCounter}). Long-press to select & send.",
-                    Toast.LENGTH_LONG).show()
+                    "Encrypted — key rotated (msg #${c.sendCounter}).",
+                    Toast.LENGTH_SHORT).show()
             } catch (t: Throwable) {
                 Toast.makeText(this, "Failed: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })
         col.addView(Ui.spacer(this, 14))
+        col.addView(copyCipher)
+        col.addView(Ui.spacer(this, 10))
         col.addView(cipherOut)
 
         col.addView(Ui.spacer(this, 40))

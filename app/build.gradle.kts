@@ -45,9 +45,14 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     // The single cryptographic dependency: BouncyCastle (audited, FIPS-track lineage).
-    // Provides ML-KEM (FIPS 203), ML-DSA (FIPS 204), X25519, Ed25519,
-    // ChaCha20-Poly1305, HKDF, Argon2id — all in one pinned artifact.
     implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+
+    // QR (identity exchange): ZXing core (pure Java, generation+decoding) and
+    // the embedded camera scanner. Camera permission is requested ONLY while
+    // the scan screen is open. QR content is never interpreted — it feeds the
+    // same strict Armor parser as pasted text.
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.bouncycastle:bcprov-jdk18on:1.80")

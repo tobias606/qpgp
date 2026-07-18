@@ -1,8 +1,8 @@
 package org.qpgp.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ScrollView
-import android.widget.Toast
 import org.qpgp.Engine
 
 class IdentityActivity : SecureActivity() {
@@ -19,23 +19,28 @@ class IdentityActivity : SecureActivity() {
         col.addView(Ui.monoCard(this, Engine.shortFingerprint(id.sig.pub), Ui.ACCENT))
         col.addView(Ui.spacer(this, 28))
 
-        col.addView(Ui.label(this,
-            "Share the block below so a contact can add you. It contains only " +
-            "public keys. qPGP never touches the clipboard itself — long-press " +
-            "the block to select and copy it deliberately."))
-
         val name = Ui.field(this, "display name to embed (optional)")
         col.addView(name)
         col.addView(Ui.spacer(this, 24))
 
+        col.addView(Ui.button(this, "▦  Show as QR (in person)") {
+            startActivity(Intent(this, QrShowActivity::class.java)
+                .putExtra("name", name.text.toString().take(48)))
+        })
+        col.addView(Ui.spacer(this, 16))
+
         val out = Ui.monoCard(this)
-        col.addView(Ui.button(this, "Generate identity block") {
-            val block = Engine.exportIdentity(d, name.text.toString().take(48))
-            out.text = block
+        val copy = Ui.copyButton(this, "identity block") { out.text.toString() }
+        copy.visibility = android.view.View.GONE
+
+        col.addView(Ui.buttonAlt(this, "⌨  Show as text block") {
+            out.text = Engine.exportIdentity(d, name.text.toString().take(48))
             out.setTextIsSelectable(true)
-            Toast.makeText(this, "Long-press the block to select & copy.", Toast.LENGTH_LONG).show()
+            copy.visibility = android.view.View.VISIBLE
         })
         col.addView(Ui.spacer(this, 24))
+        col.addView(copy)
+        col.addView(Ui.spacer(this, 12))
         col.addView(out)
 
         setContentView(ScrollView(this).apply { setBackgroundColor(Ui.BG); addView(col) })

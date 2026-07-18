@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.qpgp.crypto.Hybrid
 import org.qpgp.protocol.Armor
+import org.qpgp.protocol.Qr
 import org.qpgp.protocol.Protocol
 import org.qpgp.store.VaultCodec
 import org.qpgp.store.VaultData
@@ -205,5 +206,37 @@ class ProtocolTest {
         val polluted = "\uFEFF" + block.replace("BEGIN", "BE\u200BGIN")
         val c = Engine.importContact(polluted)
         assertEquals("alice", c.name)
+    }
+
+    @Test
+    fun qrSplitAndAssembleRoundTrip() {
+        val alice = freshUser("alice")
+        val block = Engine.exportIdentity(alice, "alice")
+        val frames = Qr.split(Qr.TYPE_IDENTITY, block)
+        assertTrue("identity should need multiple frames", frames.size > 1)
+
+        // out-of-order + duplicates + garbage interleaved — like a real scan
+        val asm = Qr.Assembler(Qr.TYPE_IDENTITY)
+        var result: String? = null
+        for (f in frames.shuffled() + listOf("not a frame", "QPGP1|I|zzzz|bad", frames[0])) {
+            asm.collect(f)?.let { result = it }
+        }
+        assertEquals(block, result)
+        // and the assembled text imports cleanly
+        assertEquals("alice", Engine.importContact(result!!).name)
+    }
+
+    @Test
+    fun qrAssemblerRejectsMixedSets() {
+        val a = Engine.exportIdentity(freshUser("a"), "a")
+        val b = Engine.exportIdentity(freshUser("b"), "b")
+        val fa = Qr.split(Qr.TYPE_IDENTITY, a)
+        val fb = Qr.split(Qr.TYPE_IDENTITY, b)
+        val asm = Qr.Assembler(Qr.TYPE_IDENTITY)
+        // feed most of A, then switch to B entirely — must assemble B, never a mix
+        fa.dropLast(1).forEach { asm.collect(it) }
+        var result: String? = null
+        fb.forEach { f -> asm.collect(f)?.let { result = it } }
+        assertEquals(b, result)
     }
 }
