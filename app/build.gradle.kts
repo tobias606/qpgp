@@ -1,7 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// Release signing: local self-signed key, config kept OUT of git in
+// local.properties (keystore.path/.password). Debug-fallback if absent.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val ksPath: String? = localProps.getProperty("keystore.path")
 
 android {
     namespace = "org.qpgp"
@@ -11,8 +21,19 @@ android {
         applicationId = "org.qpgp"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
+    }
+
+    if (ksPath != null) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(ksPath)
+                storePassword = localProps.getProperty("keystore.password")
+                keyAlias = localProps.getProperty("keystore.alias", "qpgp")
+                keyPassword = localProps.getProperty("keystore.password")
+            }
+        }
     }
 
     buildTypes {
@@ -20,6 +41,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (ksPath != null) signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
