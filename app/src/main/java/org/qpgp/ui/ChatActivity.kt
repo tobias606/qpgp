@@ -1,11 +1,22 @@
 package org.qpgp.ui
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import org.qpgp.Engine
 
 class ChatActivity : SecureActivity() {
+
+    private val editLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
+            if (res.resultCode == EditContactActivity.RESULT_DELETED) finish()
+            else recreate()   // alias / verification may have changed
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val d = Session.data ?: return
@@ -13,7 +24,18 @@ class ChatActivity : SecureActivity() {
         val c = d.contacts.getOrNull(idx) ?: run { finish(); return }
 
         val col = Ui.column(this)
-        col.addView(Ui.title(this, "⬢ ${c.name}"))
+
+        // header row: title + edit pen (top-right)
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        header.addView(Ui.title(this, "⬢ ${c.name}"),
+            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        header.addView(Ui.buttonAlt(this, "✎", Ui.ACCENT) {
+            editLauncher.launch(Intent(this, EditContactActivity::class.java).putExtra("idx", idx))
+        })
+        col.addView(header)
         col.addView(Ui.subtitle(this, if (c.verified) "✔ verified contact" else "⚠ unverified contact"))
 
         if (!c.verified) {
