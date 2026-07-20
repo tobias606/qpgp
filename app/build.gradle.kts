@@ -21,8 +21,8 @@ android {
         applicationId = "org.qpgp"
         minSdk = 28
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 4
+        versionName = "0.3.0"
     }
 
     if (ksPath != null) {
@@ -75,6 +75,10 @@ dependencies {
     // same strict Armor parser as pasted text.
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // Biometric unlock (opt-in): passphrase sealed under a hardware Keystore
+    // key that requires biometric auth per use.
+    implementation("androidx.biometric:biometric:1.1.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.bouncycastle:bcprov-jdk18on:1.80")

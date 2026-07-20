@@ -114,7 +114,16 @@ object Ui {
     fun column(a: AppCompatActivity) = LinearLayout(a).apply {
         orientation = LinearLayout.VERTICAL
         setBackgroundColor(BG)
-        setPadding(52, 56, 52, 72)
+        // targetSdk 35 = forced edge-to-edge: content draws under the status
+        // bar unless we pad for the system insets ourselves. Base padding +
+        // dynamic top/bottom inset keeps everything comfortably below the
+        // notch/status bar and above the gesture bar on any phone.
+        setPadding(52, 120, 52, 72)
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+            val bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            v.setPadding(52, bars.top + 56, 52, bars.bottom + 72)
+            insets
+        }
     }
     fun spacer(a: AppCompatActivity, h: Int) = TextView(a).apply { height = h }
 

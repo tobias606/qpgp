@@ -53,6 +53,46 @@ class UnlockActivity : SecureActivity() {
                 if (Session.unlock(this, pass)) { pass.fill('\u0000'); go() }
                 else toast("Wrong passphrase (or vault bound to a different device state)")
             })
+
+            // biometric unlock, if the user opted in via Settings
+            val bio = org.qpgp.store.BiometricStore(this)
+            val canBio = androidx.biometric.BiometricManager.from(this)
+                .canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG) ==
+                androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS
+            if (bio.isEnabled() && canBio) {
+                col.addView(Ui.spacer(this, 16))
+                col.addView(Ui.buttonAlt(this, "☝  Unlock with biometrics", Ui.ACCENT) {
+                    val cipher = try { bio.decryptCipher() } catch (t: Throwable) {
+                        // key invalidated (new fingerprint enrolled) or blob corrupt
+                        bio.disable()
+                        toast("Biometric key invalidated — use passphrase and re-enable in Settings")
+                        return@buttonAlt
+                    }
+                    val prompt = androidx.biometric.BiometricPrompt(this,
+                        androidx.core.content.ContextCompat.getMainExecutor(this),
+                        object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                            override fun onAuthenticationSucceeded(
+                                r: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                                val pass = try { bio.finishUnlock(r.cryptoObject!!.cipher!!) }
+                                catch (t: Throwable) {
+                                    bio.disable()
+                                    toast("Unseal failed — use passphrase and re-enable in Settings")
+                                    return
+                                }
+                                if (Session.unlock(this@UnlockActivity, pass)) { pass.fill('\u0000'); go() }
+                                else { pass.fill('\u0000'); toast("Vault unlock failed") }
+                            }
+                        })
+                    prompt.authenticate(
+                        androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+                            .setTitle("Unlock qPGP")
+                            .setNegativeButtonText("Use passphrase")
+                            .setAllowedAuthenticators(
+                                androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                            .build(),
+                        androidx.biometric.BiometricPrompt.CryptoObject(cipher))
+                })
+            }
         }
 
         Session.onLocked = { }

@@ -73,15 +73,56 @@ class Vault(private val ctx: Context) {
         return v
     }
 
-    /** Crypto-shred: overwrite (best effort on flash) then delete + drop keystore key. */
+    /**
+     * Vault destruction — forensic honesty:
+     *
+     * The PRIMARY erasure mechanism is CRYPTO-SHREDDING: destroying the
+     * non-exportable Keystore key (held in TEE/StrongBox, never on flash)
+     * makes every vault byte on disk permanently undecryptable, even if a
+     * forensic lab images the raw flash and recovers old copies — those
+     * copies are AES-GCM ciphertext whose key no longer exists anywhere.
+     * Layer 2 (Argon2id passphrase) additionally protects any recovered
+     * ciphertext even in the hypothetical case of a keystore compromise.
+     *
+     * We ALSO do best-effort multi-pass overwrite + delete of every app
+     * file, but on flash (FTL wear-leveling) overwrite-in-place is not
+     * guaranteed to hit the same physical cells — which is exactly why
+     * crypto-shredding, not overwriting, carries the guarantee here.
+     * This construction (key destruction in hardware) is the strongest
+     * erasure primitive available on any phone.
+     */
     fun destroy() {
-        if (file.exists()) {
-            runCatching { file.writeBytes(ByteArray(file.length().toInt())) }
-            file.delete()
-        }
+        // 1. crypto-shred: kill BOTH keystore keys first (vault + biometric)
         runCatching {
             val ks = KeyStore.getInstance(ANDROID_KS).apply { load(null) }
             ks.deleteEntry(KEY_ALIAS)
+            ks.deleteEntry("qpgp.bio.v1")
+        }
+        // 2. best-effort physical overwrite (3 passes: random, ones, zeros)
+        //    of every file in our sandbox, then delete
+        val rng = java.security.SecureRandom()
+        fun shredFile(f: File) {
+            runCatching {
+                val len = f.length().toInt()
+                if (len > 0) {
+                    val buf = ByteArray(len)
+                    rng.nextBytes(buf); f.writeBytes(buf)
+                    java.util.Arrays.fill(buf, 0xFF.toByte()); f.writeBytes(buf)
+                    java.util.Arrays.fill(buf, 0x00.toByte()); f.writeBytes(buf)
+                }
+            }
+            runCatching { f.delete() }
+        }
+        fun shredDir(dir: File) {
+            dir.listFiles()?.forEach { if (it.isDirectory) shredDir(it) else shredFile(it) }
+            runCatching { dir.delete() }
+        }
+        // filesDir, cache, and any shared_prefs/databases siblings
+        shredDir(ctx.filesDir)
+        shredDir(ctx.cacheDir)
+        ctx.filesDir.parentFile?.listFiles()?.forEach { sub ->
+            if (sub.name in setOf("shared_prefs", "databases", "app_textures", "code_cache"))
+                shredDir(sub)
         }
     }
 

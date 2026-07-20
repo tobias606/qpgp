@@ -30,6 +30,10 @@ class ContactsActivity : SecureActivity() {
             startActivity(Intent(this, AddContactActivity::class.java))
         })
         col.addView(Ui.spacer(this, 16))
+        col.addView(Ui.buttonAlt(this, "⚙  Settings") {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        })
+        col.addView(Ui.spacer(this, 16))
         col.addView(Ui.buttonAlt(this, "🔒  Lock now", Ui.DANGER) { Session.lock(); recreate() })
 
         col.addView(Ui.spacer(this, 40))
