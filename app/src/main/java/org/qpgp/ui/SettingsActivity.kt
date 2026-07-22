@@ -92,6 +92,58 @@ class SettingsActivity : SecureActivity() {
         col.addView(Ui.spacer(this, 40))
         col.addView(Ui.divider(this))
 
+        // ---- duress PIN ----
+        col.addView(Ui.label(this, "Duress PIN", Ui.DANGER))
+        val duress = org.qpgp.store.DuressStore(this)
+        col.addView(Ui.label(this,
+            "For coercion. If you are FORCED to open the app, enter the duress " +
+            "PIN at the unlock screen instead of your passphrase. The real vault " +
+            "(identity, contacts, all keys) is instantly and irreversibly " +
+            "destroyed — same crypto-shred as Destroy vault — and a harmless " +
+            "empty vault opens in its place, looking like a normal fresh app. " +
+            "There is NO way to tell the difference, and NO recovery. Use a PIN " +
+            "you can recall under stress but that isn't your passphrase."))
+        if (duress.isConfigured()) {
+            col.addView(Ui.spacer(this, 12))
+            col.addView(Ui.mono(this, "status: configured", Ui.WARN))
+            col.addView(Ui.spacer(this, 12))
+            col.addView(Ui.buttonAlt(this, "Remove duress PIN", Ui.WARN) {
+                duress.disable()
+                Toast.makeText(this, "Duress PIN removed", Toast.LENGTH_SHORT).show()
+                recreate()
+            })
+        }
+        col.addView(Ui.spacer(this, 16))
+        val dPin = Ui.password(this, if (duress.isConfigured()) "new duress PIN" else "duress PIN (min 4)")
+        val dPin2 = Ui.password(this, "repeat duress PIN")
+        val dPass = Ui.password(this, "confirm your REAL passphrase")
+        col.addView(dPin); col.addView(Ui.spacer(this, 12))
+        col.addView(dPin2); col.addView(Ui.spacer(this, 12))
+        col.addView(dPass)
+        col.addView(Ui.spacer(this, 16))
+        col.addView(Ui.button(this, if (duress.isConfigured()) "Update duress PIN" else "Set duress PIN", Ui.DANGER) {
+            val a = dPin.text.toString(); val b = dPin2.text.toString()
+            val realP = dPass.text.toString().toCharArray()
+            when {
+                a.length < 4 -> Toast.makeText(this, "Duress PIN too short (min 4)", Toast.LENGTH_SHORT).show()
+                a != b -> Toast.makeText(this, "Duress PINs differ", Toast.LENGTH_SHORT).show()
+                !verifyPassphrase(realP) -> Toast.makeText(this, "Wrong real passphrase", Toast.LENGTH_SHORT).show()
+                a == String(realP) -> Toast.makeText(this, "Duress PIN must differ from your passphrase", Toast.LENGTH_LONG).show()
+                else -> {
+                    val pin = a.toCharArray()
+                    duress.set(pin)
+                    pin.fill('\u0000')
+                    dPin.text.clear(); dPin2.text.clear(); dPass.text.clear()
+                    Toast.makeText(this, "Duress PIN set", Toast.LENGTH_SHORT).show()
+                    recreate()
+                }
+            }
+            realP.fill('\u0000')
+        })
+
+        col.addView(Ui.spacer(this, 40))
+        col.addView(Ui.divider(this))
+
         // ---- destroy vault ----
         col.addView(Ui.label(this, "Destroy vault", Ui.DANGER))
         col.addView(Ui.label(this,

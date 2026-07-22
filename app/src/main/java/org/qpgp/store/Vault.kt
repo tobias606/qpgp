@@ -25,9 +25,15 @@ import javax.crypto.spec.GCMParameterSpec
  *
  * File format: ver(1) | argonSalt(16) | iv(12) | gcmCiphertext(inner sealed)
  */
-class Vault(private val ctx: Context) {
+class Vault(private val ctx: Context, private val slot: Slot = Slot.REAL) {
 
-    private val file: File get() = File(ctx.filesDir, "vault.qpgp")
+    /** Two independent vaults with separate files AND separate keystore keys. */
+    enum class Slot(val fileName: String, val keyAlias: String) {
+        REAL("vault.qpgp", "qpgp.vault.v1"),
+        DUMMY("dummy.qpgp", "qpgp.dummy.v1"),
+    }
+
+    private val file: File get() = File(ctx.filesDir, slot.fileName)
 
     fun exists(): Boolean = file.exists()
 
@@ -45,7 +51,7 @@ class Vault(private val ctx: Context) {
 
         val out = Wire.Writer().byte(1).raw(salt).raw(iv)
             .bytes(outer.also { require(it.size < 32 * 1024 * 1024) })
-        val tmp = File(ctx.filesDir, "vault.qpgp.tmp")
+        val tmp = File(ctx.filesDir, slot.fileName + ".tmp")
         tmp.writeBytes(out.done())
         if (!tmp.renameTo(file)) { file.delete(); tmp.renameTo(file) } // atomic-ish swap
     }
@@ -74,7 +80,7 @@ class Vault(private val ctx: Context) {
     }
 
     /**
-     * Vault destruction — forensic honesty:
+     * FULL destruction (Settings → Destroy vault) — forensic honesty:
      *
      * The PRIMARY erasure mechanism is CRYPTO-SHREDDING: destroying the
      * non-exportable Keystore key (held in TEE/StrongBox, never on flash)
@@ -89,17 +95,16 @@ class Vault(private val ctx: Context) {
      * guaranteed to hit the same physical cells — which is exactly why
      * crypto-shredding, not overwriting, carries the guarantee here.
      * This construction (key destruction in hardware) is the strongest
-     * erasure primitive available on any phone.
+     * erasure primitive available on any phone. Kills every keystore key
+     * and shreds the whole sandbox — nothing survives.
      */
     fun destroy() {
-        // 1. crypto-shred: kill BOTH keystore keys first (vault + biometric)
         runCatching {
             val ks = KeyStore.getInstance(ANDROID_KS).apply { load(null) }
-            ks.deleteEntry(KEY_ALIAS)
+            ks.deleteEntry(Slot.REAL.keyAlias)
+            ks.deleteEntry(Slot.DUMMY.keyAlias)
             ks.deleteEntry("qpgp.bio.v1")
         }
-        // 2. best-effort physical overwrite (3 passes: random, ones, zeros)
-        //    of every file in our sandbox, then delete
         val rng = java.security.SecureRandom()
         fun shredFile(f: File) {
             runCatching {
@@ -117,7 +122,6 @@ class Vault(private val ctx: Context) {
             dir.listFiles()?.forEach { if (it.isDirectory) shredDir(it) else shredFile(it) }
             runCatching { dir.delete() }
         }
-        // filesDir, cache, and any shared_prefs/databases siblings
         shredDir(ctx.filesDir)
         shredDir(ctx.cacheDir)
         ctx.filesDir.parentFile?.listFiles()?.forEach { sub ->
@@ -126,12 +130,46 @@ class Vault(private val ctx: Context) {
         }
     }
 
+    /**
+     * DURESS destruction: crypto-shred THIS vault's key + biometric key, and
+     * 3-pass overwrite + delete only THIS vault's file and volatile caches.
+     * Deliberately leaves the OTHER slot's file and keystore key untouched so
+     * the dummy vault (created immediately after) is fully functional.
+     * Also removes any biometric blob so the coercer can't trip the invalidated
+     * biometric path.
+     */
+    fun destroySlotForDuress() {
+        runCatching {
+            val ks = KeyStore.getInstance(ANDROID_KS).apply { load(null) }
+            ks.deleteEntry(slot.keyAlias)     // kill only THIS slot's key
+            ks.deleteEntry("qpgp.bio.v1")     // biometric was tied to the real vault
+        }
+        val rng = java.security.SecureRandom()
+        fun shred(f: File) {
+            runCatching {
+                val len = f.length().toInt()
+                if (len > 0) {
+                    val buf = ByteArray(len)
+                    rng.nextBytes(buf); f.writeBytes(buf)
+                    java.util.Arrays.fill(buf, 0xFF.toByte()); f.writeBytes(buf)
+                    java.util.Arrays.fill(buf, 0x00.toByte()); f.writeBytes(buf)
+                }
+            }
+            runCatching { f.delete() }
+        }
+        shred(file)
+        shred(File(ctx.filesDir, slot.fileName + ".tmp"))
+        shred(File(ctx.filesDir, "bio.qpgp"))
+        // volatile caches may hold plaintext fragments
+        ctx.cacheDir.listFiles()?.forEach { if (it.isFile) shred(it) }
+    }
+
     private fun keystoreKey(): SecretKey {
         val ks = KeyStore.getInstance(ANDROID_KS).apply { load(null) }
-        (ks.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
+        (ks.getKey(slot.keyAlias, null) as? SecretKey)?.let { return it }
 
         val spec = KeyGenParameterSpec.Builder(
-            KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            slot.keyAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
@@ -151,7 +189,6 @@ class Vault(private val ctx: Context) {
 
     companion object {
         private const val ANDROID_KS = "AndroidKeyStore"
-        private const val KEY_ALIAS = "qpgp.vault.v1"
         private val AD = "QPGP-v1/vault".toByteArray()
     }
 }
